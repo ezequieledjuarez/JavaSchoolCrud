@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package connectionSQL;
-import com.mysql.jdbc.Connection;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import javax.swing.JOptionPane;
 
@@ -18,13 +18,13 @@ public class ConnectionSQL {
     
     public Connection connect(){
         try{
-            Class.forName("com.mysql.jdbc.driver");
-            connect = DriverManager.getConnection("jdbcmysql://localhost/school", "root","");
+            Class.forName("com.mysql.jdbc.Driver");
+            connect = DriverManager.getConnection("jdbc:mysql://localhost/school", "root","");
             
             JOptionPane.showMessageDialog(null, "Conected Succesfully");
         }
         catch(Exception e){
-                        JOptionPane.showMessageDialog(null, "Conection Failed" + e.getMessage());
+                        JOptionPane.showMessageDialog(null, "Conection Failed " + e.getMessage());
 
         }
         return connect;

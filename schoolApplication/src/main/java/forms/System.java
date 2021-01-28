@@ -235,6 +235,11 @@ public class System extends javax.swing.JFrame {
                 txtSearchActionPerformed(evt);
             }
         });
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtSearchKeyReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -321,6 +326,10 @@ public class System extends javax.swing.JFrame {
         cleanBoxes();
         showInfo();
     }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
+        searchInfo(txtSearch.getText());
+    }//GEN-LAST:event_txtSearchKeyReleased
     
     public void showInfo(){
         String[] title = {"ID", "Name", "Surname", "Subject", "Note", "Status"};
@@ -437,6 +446,41 @@ public class System extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Error: register don't deleted");
         }
     }
+    
+    public void searchInfo(String value){
+        String[] title = {"ID", "Name", "Surname", "Subject", "Note", "Status"};
+        String[] register = new String[6];
+        
+        DefaultTableModel model = new DefaultTableModel(null,title);
+        
+        String SQL = "SELECT * FROM students where surname like '%"+value+"%'";
+        
+        try {
+            
+            Statement st = con.createStatement();
+            
+            ResultSet rs = st.executeQuery(SQL);
+            
+            while(rs.next()){
+                register[0] = rs.getString("idstudents");
+                register[1] = rs.getString("name");
+                register[2] = rs.getString("surname");
+                register[3] = rs.getString("subject");
+                register[4] = rs.getString("note");
+                register[5] = rs.getString("status");
+                
+                model.addRow(register);
+                
+            }
+            
+            tableStudents.setModel(model);
+            
+        } catch (Exception e) {
+            
+            JOptionPane.showMessageDialog(null,"Error: can't show data " + e.getMessage());
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */

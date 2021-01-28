@@ -8,7 +8,10 @@ package forms;
 import connectionSQL.ConnectionSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -27,6 +30,7 @@ public class System extends javax.swing.JFrame {
         
         this.setLocationRelativeTo(null);
         this.getContentPane().setBackground(getBackground());
+        showInfo();
     }
 
     /**
@@ -123,8 +127,18 @@ public class System extends javax.swing.JFrame {
         });
 
         btnDelete.setText("Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         btnUpdate.setText("Update");
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -198,15 +212,20 @@ public class System extends javax.swing.JFrame {
 
         tableStudents.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {},
+                {},
+                {},
+                {}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+
             }
         ));
+        tableStudents.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableStudentsMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(tableStudents);
 
         jLabel6.setText("Search:");
@@ -226,12 +245,12 @@ public class System extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(236, Short.MAX_VALUE))
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 366, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(136, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -267,6 +286,8 @@ public class System extends javax.swing.JFrame {
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         dataInsert();
+        cleanBoxes();
+        showInfo();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void cbSubjectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbSubjectActionPerformed
@@ -274,9 +295,74 @@ public class System extends javax.swing.JFrame {
     }//GEN-LAST:event_cbSubjectActionPerformed
 
     private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
+       cleanBoxes();
     }//GEN-LAST:event_btnNewActionPerformed
 
-   
+    private void tableStudentsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableStudentsMouseClicked
+        
+        
+        int rowSelected = tableStudents.rowAtPoint(evt.getPoint());
+        
+        txtName.setText(tableStudents.getValueAt(rowSelected, 1). toString());
+        txtSurname.setText(tableStudents.getValueAt(rowSelected, 2).toString());
+        cbSubject.setSelectedItem(tableStudents.getValueAt(rowSelected, 3));
+        txtNote.setText(tableStudents.getValueAt(rowSelected,4).toString());
+        cbStatus.setSelectedItem(tableStudents.getValueAt(rowSelected,5));
+    }//GEN-LAST:event_tableStudentsMouseClicked
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        dataUpdate();
+        cleanBoxes();
+        showInfo();
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        deleteRegister();
+        cleanBoxes();
+        showInfo();
+    }//GEN-LAST:event_btnDeleteActionPerformed
+    
+    public void showInfo(){
+        String[] title = {"ID", "Name", "Surname", "Subject", "Note", "Status"};
+        String[] register = new String[6];
+        
+        DefaultTableModel model = new DefaultTableModel(null,title);
+        
+        String SQL = "SELECT * FROM students";
+        
+        try {
+            
+            Statement st = con.createStatement();
+            
+            ResultSet rs = st.executeQuery(SQL);
+            
+            while(rs.next()){
+                register[0] = rs.getString("idstudents");
+                register[1] = rs.getString("name");
+                register[2] = rs.getString("surname");
+                register[3] = rs.getString("subject");
+                register[4] = rs.getString("note");
+                register[5] = rs.getString("status");
+                
+                model.addRow(register);
+                
+            }
+            
+            tableStudents.setModel(model);
+            
+        } catch (Exception e) {
+            
+            JOptionPane.showMessageDialog(null,"Error: can't show data " + e.getMessage());
+        }
+    }
+    public void cleanBoxes(){
+         txtName.setText("");
+         txtSurname.setText("");
+         txtNote.setText("");
+         cbStatus.setSelectedItem(null);
+         cbSubject.setSelectedItem(null);
+         
+    }
     public void dataInsert(){
         try {
             String SQL = "INSERT INTO students (name, surname, subject, note, status) values(?,?,?,?,?)";
@@ -298,8 +384,57 @@ public class System extends javax.swing.JFrame {
             
             JOptionPane.showMessageDialog(null,"Registred succesfully");
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,"Registred failet " + e.getMessage());
+            JOptionPane.showMessageDialog(null,"Registred failed " + e.getMessage());
 
+        }
+    }
+    
+    public void dataUpdate(){
+        try {
+            String SQL = "UPDATE students SET name=?, surname=?, subject=?, note=?, status=? WHERE idstudents = ?";
+            
+            int rowSelected = tableStudents.getSelectedRow();
+            String dao = (String)tableStudents.getValueAt(rowSelected, 0);
+            
+            PreparedStatement pst = con.prepareStatement(SQL);
+            
+            pst.setString(1, txtName.getText());
+            pst.setString(2, txtSurname.getText());
+            
+            int selected = cbSubject.getSelectedIndex();
+            pst.setString(3, cbSubject.getItemAt(selected));
+            
+            pst.setDouble(4, Double.parseDouble(txtNote.getText()));
+               
+            int selected2 = cbStatus.getSelectedIndex();
+            pst.setString(5, cbStatus.getItemAt(selected2));           
+            
+            pst.setString(6,dao);
+            pst.execute();
+            
+            JOptionPane.showMessageDialog(null,"Registred updated succesfully");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,"Registred failed update " + e.getMessage());
+
+        }
+    }
+    
+    public void deleteRegister(){
+        int rowSelected = tableStudents.getSelectedRow();
+        
+        try{
+            String SQL = "DELETE FROM students WHERE idstudents="+tableStudents.getValueAt(rowSelected, 0);
+            
+            Statement st = con.createStatement();
+            
+            int n = st.executeUpdate(SQL);
+            
+            if(n>=0){
+                JOptionPane.showMessageDialog(null, "Register deleted");
+            }
+        }
+        catch(Exception e){
+            JOptionPane.showMessageDialog(null, "Error: register don't deleted");
         }
     }
     /**
